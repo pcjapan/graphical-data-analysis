@@ -1,0 +1,471 @@
+---
+title: "Graphical Data Analysis"
+author: "Paul Collett"
+date: '2020-11-27'
+output:
+  html_document:
+  toc: yes
+  toc_float: yes
+  df_print: paged
+  theme: united
+  output: tango
+  code_folding: show
+  number_sections: true
+html_notebook:
+  df_print: paged
+  theme: united
+  output: tango
+  toc: yes
+  toc_float: yes
+  number_sections: true
+word_document:
+  toc: yes
+bibliography: bibliography.bib
+---
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, class.source = "bg-success", fig.height=10, fig.width=10)
+```
+```{r}
+
+```
+
+
+```{css, echo = FALSE}
+p, li {
+  font-size: 24px;
+  line-height: 1.5;
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+.bg-success {
+  font-size: 18px;
+  margin-bottom: 18px;
+}
+h4.author {font-size: 24px;}
+.caption {
+  font-size: 18px;
+  font-style: italic;
+  }
+```
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r include = FALSE}
+library(tidytext)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
+library(hrbrthemes)
+library(ggExtra)
+library(reshape2)
+library(ggridges)
+library(dabestr)
+library(readtext)
+library(quanteda)
+library(truncnorm)
+library(cowplot)
+library(ggstatsplot)
+library(viridisLite)
+
+working <- read.delim("~/Documents/Research & Papers/Reading Speed Paper/seinan analysis/2014/comprehension-data.txt", header = TRUE, sep = "\t")
+```
+# 1. Preparing your data
+
+Set your working directory where you will store the r script and any other files you may need for the project
+
+```{r}
+setwd("~/Documents/R Worksets/JALT2020 Workshop")
+```
+
+Create bimodal distribution data set to illustrate normality assumptions
+
+```{r}
+nn <- 100
+set.seed(1234)
+sim1 <- c(rtruncnorm(nn/2, a=0, b=10, mean=2, sd=.75),
+          rtruncnorm(nn/2, a=0, b=10, mean=8, sd=.75))
+```
+
+Create a more normally-distributed second sample
+
+```{r}
+set.seed(1234)
+sim2 <- rnorm(100, mean = 5, sd = .75)
+
+x1 <- as.data.frame(sim1)
+x2 <- as.data.frame(sim2)
+```
+
+Store the data in a format (dataframe) that can easily be retrieved for the analysis
+
+```{r}
+x3 <- as.data.frame(cbind(sim1, sim2)) ## this joins the two data sets together and transforms them into a dataframe
+write.csv(x3, "x3_data.csv") ## this command writes the dataframe to a csv file ("x3_data.csv") and saves it on your computer in the working directory
+```
+
+You can check there are no problems with the data by using the `head` & `tail` commands which display the first & last few lines respectively of the data:
+  
+```{r}
+head(x3); tail(x3)
+```
+
+## Histograms to show data distribution.
+
+Using the `hist` command which is part of the base installation of R. Work with the `sim1` & `sim2` samples from above. 
+
+```{r fig.height=5, fig.width=8}
+hist(sim1, prob=F, main = "", xlab = "Group 1", xlim = c(0,10), ylim = c(0,20), breaks=15, cex.main=1.5, cex.lab=1.5, cex.axis=1.5)
+abline(v=mean(sim1),col="blue", lty = 2)
+
+hist(sim2, prob=F, main = "", xlab = "Group 2", xlim = c(0,10), breaks=15, cex.main=1.5, cex.lab=1.5, cex.axis=1.5)
+abline(v=mean(sim1),col="blue", lty = 2)
+```
+
+## QQ Plots.
+
+Using the `qqnorm` command which is part of the base R installation. Work with the `sim1` & `sim2` samples from above.
+
+```{r}
+qqnorm(sim1, cex.main=1.5, cex.lab=1.5, cex.axis=1.5, main = "Group 1")	# this produces the graph
+qqline(sim1) # this adds a line showing a theoretical normal distribution for comparison
+
+qqnorm(sim2, cex.main=1.5, cex.lab=1.5, cex.axis=1.5,  main = "Group 2")	# this produces the graph
+qqline(sim2)  # this adds a line showing a theoretical normal distribution for comparison
+```
+
+# Graphical Analysis
+
+## Boxplots
+
+**Boxplots** are good for showing the difference between two (or more) samples, e.g. when you would do a t-test or an ANOVA (or a non-parametric equivalent). 
+
+* To create a basic boxplot using base R installation commands:
+  
+```{r  fig.height=5, fig.width=12}
+boxplot(sim2, col = "white", ann = F, horizontal = T, ylim = c(3,7))
+#using dataset sim2, no annotations on the axes, y axis range is from 3 to 7
+```
+
+
+## Boxplots for simulated data set 1.
+
+These are created using the ggplot2 package. This can be installed and activated as follows:
+
+```{r eval = FALSE}
+install.packages("ggplot2")
+library(ggplot2)
+```
+
+The code to generate the boxplot is more complex here. The first three lines of code create the plot; the following code handles the appearance of the plot. In this case we're creating two plots, fig5a & fig5b.
+
+
+```{r}
+fig5a <- ggplot(x1) +
+  aes(x = "", y = sim1) +
+  geom_boxplot() +
+  # These commands control the appearance of aspects of the theme
+  theme_minimal() +
+  theme(axis.text.x = element_text(size=14), 
+        axis.text.y = element_text(size = 14),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
+        strip.text.x = element_text(size = 14)) +
+  ylim(0, 10) +
+  labs(x = "Group 1", y = "Comprehension Score")
+
+fig5b <- ggplot(x2) +
+  aes(x = "", y = sim2) +
+  geom_boxplot() +
+  theme_minimal()  +
+  theme(axis.text.x = element_text(size=14),
+        axis.text.y = element_blank(),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
+        strip.text.x = element_text(size = 14)) +
+  ylim(0, 10) +
+  labs(x = "Group 2", y = "")
+```
+
+Load the `cowplot` package. This lets you plot different graphs on the same grid...
+
+```{r eval = FALSE}
+install.packages("cowplot")
+library(cowplot)
+```
+
+...using the `plot_grid` command from `cowplot`
+
+```{r}
+plot_grid(fig5a, fig5b)
+```
+
+
+
+## Boxplots for simulated data set 1 augmented with jittered data.
+
+Here we add the data points to the boxplot. This involves just one extra line of code:
+
+
+```{r fig.cap = "Figure 6"}
+fig6a <- ggplot(x1) +
+  aes(x = "", y = sim1) +
+  geom_boxplot() +
+  # This additional line of code adds the data points
+  geom_jitter(width = .2, size = 3, colour = "orange") + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size = 14),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
+        strip.text.x = element_text(size = 14)) +
+  ylim(0, 10) +
+  labs(x = "Group 1", y = "Comprehension Score")
+
+fig6b <- ggplot(x2) +
+  aes(x = "", y = sim2) +
+  geom_boxplot(outlier.shape = NA) +
+  geom_jitter(width = .2, size = 3, colour = "blue") +
+  theme_minimal()  +
+  theme(axis.text.x = element_text(size=14), 
+        axis.text.y = element_blank(),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
+        strip.text.x = element_text(size = 14,)) +
+  ylim(0, 10) +
+  labs(x = "Group 2", y = "")
+plot_grid(fig6a, fig6b)
+```
+
+## Dotplot for simulated data set 1.
+
+An alternative way to display the data is as a dotplot
+
+```{r}
+fig7a <- ggplot(x1) + 
+  aes(x = "", y = sim1, fill = "sim1") +
+  # main changes are as follows
+  stat_summary(fun = median, fun.min = median, fun.max = median, geom = "crossbar", width = 0.6, size = 0.4, color = "black", alpha = 0.6) + # generate the bar showing the median score
+  geom_dotplot(binaxis ="y", binwidth = 0.2, stackdir = "center", stackratio = 1.5) + # plot the data as individual points 
+  theme_minimal() +
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size = 14),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
+        strip.text.x = element_text(size = 14)) +
+  ylim(0, 10) +
+  labs(x = "Group 1", y = "Comprehension Score")
+
+fig7b <- ggplot(x2) + 
+  aes(x = "", y = sim2, fill = "sim1") +
+  stat_summary(fun = median, fun.min = median, fun.max = median, geom = "crossbar", width = 0.6, size = 0.4, color = "black", alpha = 0.6) + # generate the bar showing the median score
+  geom_dotplot(binaxis ="y", binwidth = 0.2, stackdir = "center", stackratio = 1.5) +
+  theme_minimal() + 
+  theme(legend.position = "none", 
+        axis.text.x = element_text(size=14), 
+        axis.text.y = element_blank(), 
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"),
+        strip.text.x = element_text(size = 14)) +
+  ylim(0, 10) +
+  labs(x = "Group 2", y = "")
+
+plot_grid(fig7a, fig7b)
+```
+
+## Violin plots for simulated data set 1.
+
+Violin plots show how the data is distributed and as such are helpful for understanding the structure of your dataset. 
+
+```{r}
+fig8a <- ggplot(x1) +
+  aes(x = "", y = sim1) +
+  # This is the only change from figure 5, calling for a violin plot rather than a boxplot.
+  # The adjust and scale arguments set the size of the plots.
+  geom_violin(adjust = 1L, scale = "count") + 
+  theme_minimal() +
+  theme(axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size = 14),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
+        strip.text.x = element_text(size = 14)) +
+  ylim(0, 10) +
+  labs(x = "Group 1", y = "Comprehension Score")
+
+fig8b <- ggplot(x2) +
+  aes(x = "", y = sim2) +
+  geom_violin(adjust = 1L, scale = "area") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size=14),
+        axis.text.y = element_blank(),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
+        strip.text.x = element_text(size = 14)) +
+  ylim(0, 10) +
+  labs(x = "Group 2", y = "")
+
+plot_grid(fig8a, fig8b)
+```
+
+## Notched boxplots
+
+```{r}
+set.seed(1234)
+response = rnorm(n = 80, mean = c(74, 70), sd = c(3, 4.5))
+group = rep(letters[1:2], length.out = 80)
+sim4 <- data.frame(group,
+                   response)
+
+ggplot(sim4) +
+  aes(x = group, y = response) +
+  geom_boxplot(notch = TRUE, notchwidth = 0.75) +
+  theme_minimal()  +
+  theme(axis.text.x = element_text(size=14), # These commands control aspects of the theme, in this case the axis text
+        axis.text.y = element_text(size = 14),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
+        strip.text.x = element_text(size = 14)) +
+  ylim(55, 85) +
+  labs(x = "Groups", y = "")
+```
+
+# Scatterplots - Looking at Relationships
+
+## Anscombe’s scatterplots.
+(Code taken from the _dataset_ package - see https://rdrr.io/r/datasets/anscombe.html)
+
+```{r}
+anscombe
+summary(anscombe)
+ff <- y ~ x
+mods <- setNames(as.list(1:4), paste0("lm", 1:4))
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  ## or   ff[[2]] <- as.name(paste0("y", i))
+  ##      ff[[3]] <- as.name(paste0("x", i))
+  mods[[i]] <- lmi <- lm(ff, data = anscombe)
+  print(anova(lmi))
+}
+
+sapply(mods, coef)
+lapply(mods, function(fm) coef(summary(fm)))
+
+
+op <- par(mfrow = c(2, 2), mar = 0.1+c(4,4,1,1), oma =  c(0, 0, 2, 0))
+for(i in 1:4) {
+  ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
+  plot(ff, data = anscombe, col = "red", pch = 21, bg = "orange", cex = 1.2,
+       xlim = c(3, 19), ylim = c(3, 13))
+  abline(mods[[i]], col = "blue")
+}
+mtext("Anscombe's 4 Regression data sets", outer = TRUE, cex = 1.5)
+par(op)
+
+lmi
+summary(lm(y1 ~ x1, dat = anscombe))
+summary(lm(y2 ~ x2, dat = anscombe))
+summary(lm(y3 ~ x3, dat = anscombe))
+```
+
+## Scatterplot with loess and regression lines for simulated dataset 3.
+
+First, genrate dataset to use
+
+```{r}
+sim5 <- data.frame(Subject = (1:30),
+                   Group = rep(c("A","B")),
+                  x = c(1,1,1,2,2,2,3,3,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,8,8,8,9,9),
+                  y = c(6,3,5,1,9,4,6,2,11,4,12,7,13,6,10,6,18,4,17,7,16,7,10,6,14,5,15,9,16,12))
+
+group_names <- c(
+  A = "Group A",
+  B = "Group B"
+)
+```
+Next, generate the plot
+
+```{r}
+ggplot(sim5) +
+  aes(x = x, y = y) +
+  geom_point(size = 3, aes(shape = Group, colour = Group), alpha = .8) +
+  geom_smooth(span = 0.75, se = F, aes(colour = Group, linetype = "dashed")) +
+  geom_smooth(method = "lm", aes(fill = Group, linetype = "dotted"), alpha = 0.1) +
+  theme_minimal() +
+  scale_colour_viridis_d(begin = .3, end = .7) +
+  scale_fill_viridis_d(option = "C", begin = .2, end = .8) +
+  theme(axis.text.x = element_text(size=14),
+        axis.text.y = element_text(size = 14),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"),
+        strip.text.x = element_text(size = 14)) + 
+  scale_linetype_discrete(guide = FALSE) 
+```
+
+# _Figure 12_. Unpaired estimation plot (2 sample).
+
+First, transfer the data set to the correct format
+
+```{r}
+sim5.long <- reshape2::melt(sim5, id = c("Subject", "Group"), measured = c("x", "y"))
+```
+
+```{r}
+fig12 <- dabest(sim5.long, variable, value,
+                             idx = c("x", "y"),
+                             paired = FALSE) %>% 
+  cohens_d()
+
+fig12
+
+plot(fig12, color.column = Group, rawplot.ylabel = "Group Scores", effsize.ylabel = "Effect Size (Cohens d) and 95% CI (5,000 bootstrap resamples)")
+```
+
+## Paired estimation plot (2 sample).
+
+```{r}
+fig13 <- dabest(sim5.long, variable, value,
+                           idx = c("x", "y"),
+                           paired = TRUE, id.col = Subject)
+fig13.effect <- cohens_d(fig13)  
+
+
+plot(fig13.effect, color.column = Group, rawplot.ylabel = "Group Scores", effsize.ylabel = "Effect Size (Cohens d) and 95% CI (5,000 bootstrap resamples)")
+
+```
+
+# Additional Graphics
+
+The following were not included in the original paper due to word count limitations. THey are presented here as a supplement.
+
+* To work with the `ggplot2` library, and many other functions in R, your data has to be in `long` format, as opposed to `wide`
+* `Wide` format is where each individual subject is recorded as a unique row of your excel/csv file, with a column for every measured variable related to that subject, `Long` format has every row containing a measure for a particular variable for each subject. In a `wide` dataset the subjects will not be repeated in rows. In a `long` dataset, the subject may be listed in multiple rows as the data is grouped by the subject response to each variable under study.
+* It's fairly easy to change the format of your data in R. One way is by using the `melt` function in the `reshape2` library (this is part of the R base installation):
+
+```{r}
+require(reshape2)
+```
+
+* then run the necessary code
+
+```{r}
+longComp <- melt(working, id = c("ID", "Class"), measured = c("Pretest", "Posttest"))
+names(longComp) <- c("Student", "Class", "Test", "Comprehension")
+```
+
+To see the difference in the data, look at the first few rows.
+
+Here, we have a pretest and posttest score for each student from separate classes on a comprehension test. Scores are entered as one row for each student.
+
+```{r}
+head(working) ## Original data
+tail(working)
+```
+
+Now the data has been rearranged to list in each row the comprehension score for each student by the kind of test. 
+
+```{r}
+head(longComp) ## New data
+tail(longComp)
+```
+
