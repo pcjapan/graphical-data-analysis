@@ -383,7 +383,7 @@ group_names <- c(
   B = "Group B"
 )
 ```
-Next, generate the plot
+Next, generate the plot. This includes a regression line (dotted blue line) which shows a prediction of how the data should vary and a loess line. The latter, the curved line, 
 
 ```{r}
 ggplot(sim5) +
@@ -402,7 +402,7 @@ ggplot(sim5) +
   scale_linetype_discrete(guide = FALSE) 
 ```
 
-# _Figure 12_. Unpaired estimation plot (2 sample).
+## Unpaired estimation plot (2 sample).
 
 First, transfer the data set to the correct format
 
