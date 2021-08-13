@@ -2,25 +2,26 @@
 title: "Graphical Data Analysis"
 author: "Paul Collett"
 date: '2020-11-27'
-output:
+output: 
+  rmdformats::readthedown:
   html_document:
-  toc: yes
-  toc_float: yes
-  df_print: paged
-  theme: united
-  output: tango
-  code_folding: show
-  number_sections: true
-html_notebook:
-  df_print: paged
-  theme: united
-  output: tango
-  toc: yes
-  toc_float: yes
-  number_sections: true
-word_document:
-  toc: yes
-bibliography: bibliography.bib
+    toc: true
+    toc_float: true
+    toc_depth: 3
+    df_print: paged
+    theme: united
+    output: tango
+    code_folding: show
+  html_notebook:
+    df_print: paged
+    theme: united
+    output: tango
+    toc: true
+    toc_float: true
+    number_sections: true
+  word_document:
+    toc: true
+  bibliography: bibliography.bib
 ---
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, class.source = "bg-success", fig.height=10, fig.width=10)
@@ -45,7 +46,13 @@ h4.author {font-size: 24px;}
 .caption {
   font-size: 18px;
   font-style: italic;
+}
+#note {
+  padding: 5px;
+  background: #FF9300;
+  color: white;
   }
+
 ```
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -67,10 +74,11 @@ library(truncnorm)
 library(cowplot)
 library(ggstatsplot)
 library(viridisLite)
+library(rmdformats)
 
-working <- read.delim("~/Documents/Research & Papers/Reading Speed Paper/seinan analysis/2014/comprehension-data.txt", header = TRUE, sep = "\t")
+working <- read.delim("comprehension-data.txt", header = TRUE, sep = "\t")
 ```
-# 1. Preparing your data
+# Preparing your data
 
 Set your working directory where you will store the r script and any other files you may need for the project
 
@@ -134,9 +142,7 @@ qqnorm(sim2, cex.main=1.5, cex.lab=1.5, cex.axis=1.5,  main = "Group 2")	# this 
 qqline(sim2)  # this adds a line showing a theoretical normal distribution for comparison
 ```
 
-# Graphical Analysis
-
-## Boxplots
+# Boxplots and variants for comparisions
 
 **Boxplots** are good for showing the difference between two (or more) samples, e.g. when you would do a t-test or an ANOVA (or a non-parametric equivalent). 
 
@@ -383,7 +389,7 @@ group_names <- c(
   B = "Group B"
 )
 ```
-Next, generate the plot. This includes a regression line (dotted blue line) which shows a prediction of how the data should vary and a loess line. The latter, the curved line, 
+Next, generate the plot. This includes a regression line (dotted blue line) with confidence interval band, and a loess line (the curved line). 
 
 ```{r}
 ggplot(sim5) +
@@ -404,6 +410,7 @@ ggplot(sim5) +
 
 ## Unpaired estimation plot (2 sample).
 
+An alternative to carrying out statistical significance tests. 
 First, transfer the data set to the correct format
 
 ```{r}
@@ -434,19 +441,32 @@ plot(fig13.effect, color.column = Group, rawplot.ylabel = "Group Scores", effsiz
 
 ```
 
+
+
+## NOTE
+
+The following section will be completed soon.
+
 # Additional Graphics
 
-The following were not included in the original paper due to word count limitations. THey are presented here as a supplement.
+The following was not included in the original paper due to word count limitations. It is presented here as a supplement.
+
+* the data we will work with here is available on my Github repository https://github.com/pcjapan/graphical-data-analysis. The first data set is called comprehension-data.txt. Save a copy of the data in your working directory, and then read into R: 
+
+```{r eval = FALSE}
+working <- read.delim("path_to_file/comprehension-data.txt", header = TRUE, sep = "\t")
+```
 
 * To work with the `ggplot2` library, and many other functions in R, your data has to be in `long` format, as opposed to `wide`
-* `Wide` format is where each individual subject is recorded as a unique row of your excel/csv file, with a column for every measured variable related to that subject, `Long` format has every row containing a measure for a particular variable for each subject. In a `wide` dataset the subjects will not be repeated in rows. In a `long` dataset, the subject may be listed in multiple rows as the data is grouped by the subject response to each variable under study.
+* `Wide` format is where each individual subject is recorded as a unique row of your excel/csv file, with a column for every measured variable related to that subject, `Long` format has every row containing a measure for a particular variable for each subject. In `wide` data the subjects will not be repeated in rows. In `long` data, the subject may be listed in multiple rows as the data is grouped by the subject response to each variable under study.
 * It's fairly easy to change the format of your data in R. One way is by using the `melt` function in the `reshape2` library (this is part of the R base installation):
 
 ```{r}
 require(reshape2)
 ```
 
-* then run the necessary code
+* then run the necessary code. Remember, we're working with data that has been loaded into the "working" dataframe, and we will save the transformed data into a new dataframe named "longComp".
+
 
 ```{r}
 longComp <- melt(working, id = c("ID", "Class"), measured = c("Pretest", "Posttest"))
@@ -469,3 +489,93 @@ head(longComp) ## New data
 tail(longComp)
 ```
 
+For any research project, first check your data to see how it is distributed
+
+* Check data for normality - generate a qqplot
+
+```{r fig.height=5, fig.width=8}
+qqnorm(working$Pretest, pch = 1, frame = FALSE)
+qqline(working$Pretest, col = "steelblue", lwd = 2)
+```
+
+* Or look at a histogram of the distribution.
+
+Here, think about what you are expecting to see in the data. A skewed distribution may be what your theory predicts, so may not be a problem; however, it raises issues for the kinds of statistical tests you can carry out.
+
+```{r}
+ggplot(working, aes(x=Pretest)) + 
+  geom_histogram(aes(y=..density..), colour="gray", fill="white", binwidth = .3)+
+  geom_density(color = "red", alpha=.2, fill="#FF6666") 
+```
+
+
+**Line graphs** can show changes in trends in a dataset, but are limited in the information they show. Augmenting with confidence interval bars makes them slightly more informative. Here, we use the `facet_grid` function in `ggplot2` to plot the three graphs on individual panels and display them side-by-side, rather than having them all plotted on the same panel which would reduce readability.  
+
+```{r fig.height=5, fig.width=10}
+line <- ggplot(longComp, aes(Test, Comprehension, color = Class))
+line + stat_summary(fun = mean, geom = "point") + 
+  stat_summary(fun = mean, geom = "line", aes(group = Class)) +
+  theme_minimal() + 
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + ## Add confidence interval (CI) error bars
+  facet_grid(.~Class)
+```
+
+## Theming graphs
+
+Here is where the power of `ggplot` comes into play. You can create a more attractive version of the above or modify most aspects of the display by setting various paramater
+
+* If you haven't already done so, install (you only need to do this the first time you use it) and load the current version of the ggplot library, `ggplot2`:
+
+```{r eval = FALSE}
+install.packages(ggplot2)
+```
+
+* Then load the package into R. You need to do this with all packages you wish to use:
+
+```{r eval = FALSE}
+library(ggplot2) #load and activate the package
+```
+
+* Generate the graph, here we're making a boxplot:
+
+```{r}
+boxplot <- ggplot(longComp, aes(Class, Comprehension)) #this creates the base graph
+
+CompBox <- boxplot +
+  geom_boxplot(outlier.shape = NA, aes(fill = Class)) +  # adding layers to the graph - this sets up the boxplot, using the "Class" condition to identify the data 
+  labs(x = "Class", y = "Mean Comprehension Score") + # add labels to the x & y axes
+  theme(legend.position = "none", axis.text.x = element_text(size=14), # These commands control the appearance of aspects of the theme
+        axis.text.y = element_text(size = 14),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
+        strip.text.x = element_text(size = 14), 
+        panel.background = element_rect(fill = "snow1")) + 
+  viridis::scale_fill_viridis(discrete = TRUE, alpha=0.6) + # Use the viridis colour palettes for colour choices - improves readability
+  ggtitle("Changes in Comprehension Scores") + # add a title
+  scale_y_continuous(breaks=seq(0,10,1)) + # set the y-axis scale
+  facet_wrap(~Test) # this creates a panelled view where the graphs are displayed in separate panels based on the "Test" condition
+
+CompBox  +
+  geom_jitter(color="black", size=2, alpha=0.6, width = 0.1) #here you are adding the data points to the graph
+```
+
+**Violin plots**  To get a violin plot, just change a couple of lines in the code above:
+
+```{r}
+violinplot <- boxplot +
+  geom_violin(scale = "count", aes(fill = Class)) + # adding the plot layer to the graph - "count" means areas are scaled proportionally to the number of observations
+  geom_boxplot(width=0.1, color="grey60", alpha=0.8, ) + # optionally adding boxplots to provide another layer of detail
+  labs(x = "Class", y = "Mean Comprehension Score") + 
+  theme(legend.position = "none", axis.text.x = element_text(size=14), 
+        axis.text.y = element_text(size = 14),
+        axis.title = element_text(size = 16, lineheight = 2),
+        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
+        strip.text.x = element_text(size = 14), 
+        panel.background = element_rect(fill = "snow1")) + 
+  viridis::scale_fill_viridis(discrete = TRUE, alpha=0.6) +
+  ggtitle("Changes in Comprehension Scores") + 
+  scale_y_continuous(breaks=seq(0,10,1)) + 
+  facet_wrap(~Test) 
+
+violinplot
+```
