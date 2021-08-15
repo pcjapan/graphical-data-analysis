@@ -3,19 +3,15 @@ title: "Graphical Data Analysis"
 author: "Paul Collett"
 date: '2020-11-27'
 output: 
-  rmdformats::readthedown:
+  rmdformats::downcute:
   html_document:
     toc: true
     toc_float: true
     toc_depth: 3
     df_print: paged
-    theme: united
-    output: tango
     code_folding: show
   html_notebook:
     df_print: paged
-    theme: united
-    output: tango
     toc: true
     toc_float: true
     number_sections: true
@@ -37,6 +33,10 @@ p, li {
   line-height: 1.5;
   margin-top: 24px;
   margin-bottom: 12px;
+}
+img {
+  margin-top: 15px;
+  margin-bottom: 30px;
 }
 .bg-success {
   font-size: 18px;
@@ -75,18 +75,16 @@ library(cowplot)
 library(ggstatsplot)
 library(viridisLite)
 library(rmdformats)
-
-working <- read.delim("comprehension-data.txt", header = TRUE, sep = "\t")
 ```
 # Preparing your data
 
-Set your working directory where you will store the r script and any other files you may need for the project
+Set your working directory where you will store the R script and any other files you may need for the project:
 
 ```{r}
 setwd("~/Documents/R Worksets/JALT2020 Workshop")
 ```
 
-Create bimodal distribution data set to illustrate normality assumptions
+Create bimodal distribution data set to illustrate normality assumptions:
 
 ```{r}
 nn <- 100
@@ -95,7 +93,7 @@ sim1 <- c(rtruncnorm(nn/2, a=0, b=10, mean=2, sd=.75),
           rtruncnorm(nn/2, a=0, b=10, mean=8, sd=.75))
 ```
 
-Create a more normally-distributed second sample
+Create a more normally-distributed second sample:
 
 ```{r}
 set.seed(1234)
@@ -105,7 +103,7 @@ x1 <- as.data.frame(sim1)
 x2 <- as.data.frame(sim2)
 ```
 
-Store the data in a format (dataframe) that can easily be retrieved for the analysis
+Store the data in a format (dataframe) that can easily be retrieved for the analysis:
 
 ```{r}
 x3 <- as.data.frame(cbind(sim1, sim2)) ## this joins the two data sets together and transforms them into a dataframe
@@ -154,7 +152,7 @@ boxplot(sim2, col = "white", ann = F, horizontal = T, ylim = c(3,7))
 ```
 
 
-## Boxplots for simulated data set 1.
+## Boxplots for simulated data set 1
 
 These are created using the ggplot2 package. This can be installed and activated as follows:
 
@@ -208,7 +206,7 @@ plot_grid(fig5a, fig5b)
 
 
 
-## Boxplots for simulated data set 1 augmented with jittered data.
+## Boxplots for simulated data set 1 augmented with jittered data
 
 Here we add the data points to the boxplot. This involves just one extra line of code:
 
@@ -243,7 +241,7 @@ fig6b <- ggplot(x2) +
 plot_grid(fig6a, fig6b)
 ```
 
-## Dotplot for simulated data set 1.
+## Dotplot for simulated data set 1
 
 An alternative way to display the data is as a dotplot
 
@@ -280,7 +278,7 @@ fig7b <- ggplot(x2) +
 plot_grid(fig7a, fig7b)
 ```
 
-## Violin plots for simulated data set 1.
+## Violin plots for simulated data set 1
 
 Violin plots show how the data is distributed and as such are helpful for understanding the structure of your dataset. 
 
@@ -341,9 +339,19 @@ ggplot(sim4) +
 ## Anscombe’s scatterplots.
 (Code taken from the _dataset_ package - see https://rdrr.io/r/datasets/anscombe.html)
 
+Visualising the dataset doesn't give a lot of information
+
 ```{r}
 anscombe
+```
+
+Printing a summary of the data suggests each dataset is very similar:
+
+```{r}
 summary(anscombe)
+```
+
+```{r include = FALSE}
 ff <- y ~ x
 mods <- setNames(as.list(1:4), paste0("lm", 1:4))
 for(i in 1:4) {
@@ -356,27 +364,41 @@ for(i in 1:4) {
 
 sapply(mods, coef)
 lapply(mods, function(fm) coef(summary(fm)))
+```
 
+As do the results of a regression analysis comparing the datasets:
+
+```{r}
+summary(lm(y1 ~ x1, dat = anscombe))
+summary(lm(y2 ~ x2, dat = anscombe))
+summary(lm(y3 ~ x3, dat = anscombe))
+```
+
+
+```{r include = FALSE}
 
 op <- par(mfrow = c(2, 2), mar = 0.1+c(4,4,1,1), oma =  c(0, 0, 2, 0))
+```
+
+However, graphing the data shows how the statistics can be misleading:
+
+```{r}
+
 for(i in 1:4) {
   ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
   plot(ff, data = anscombe, col = "red", pch = 21, bg = "orange", cex = 1.2,
        xlim = c(3, 19), ylim = c(3, 13))
   abline(mods[[i]], col = "blue")
 }
-mtext("Anscombe's 4 Regression data sets", outer = TRUE, cex = 1.5)
-par(op)
-
-lmi
-summary(lm(y1 ~ x1, dat = anscombe))
-summary(lm(y2 ~ x2, dat = anscombe))
-summary(lm(y3 ~ x3, dat = anscombe))
 ```
 
-## Scatterplot with loess and regression lines for simulated dataset 3.
 
-First, genrate dataset to use
+
+
+
+## Scatterplot with loess and regression lines for simulated dataset 3
+
+First, generate the dataset to use
 
 ```{r}
 sim5 <- data.frame(Subject = (1:30),
@@ -408,7 +430,9 @@ ggplot(sim5) +
   scale_linetype_discrete(guide = FALSE) 
 ```
 
-## Unpaired estimation plot (2 sample).
+# Estimation Plots
+
+## Unpaired estimation plot (2 sample)
 
 An alternative to carrying out statistical significance tests. 
 First, transfer the data set to the correct format
@@ -428,7 +452,7 @@ fig12
 plot(fig12, color.column = Group, rawplot.ylabel = "Group Scores", effsize.ylabel = "Effect Size (Cohens d) and 95% CI (5,000 bootstrap resamples)")
 ```
 
-## Paired estimation plot (2 sample).
+## Paired estimation plot (2 sample)
 
 ```{r}
 fig13 <- dabest(sim5.long, variable, value,
@@ -442,19 +466,51 @@ plot(fig13.effect, color.column = Group, rawplot.ylabel = "Group Scores", effsiz
 ```
 
 
-
-## NOTE
-
-The following section will be completed soon.
-
-# Additional Graphics
+# Extras
 
 The following was not included in the original paper due to word count limitations. It is presented here as a supplement.
 
-* the data we will work with here is available on my Github repository https://github.com/pcjapan/graphical-data-analysis. The first data set is called comprehension-data.txt. Save a copy of the data in your working directory, and then read into R: 
+## ggstatsplot
 
-```{r eval = FALSE}
-working <- read.delim("path_to_file/comprehension-data.txt", header = TRUE, sep = "\t")
+This [package](https://indrajeetpatil.github.io/ggstatsplot/index.html) plots graphs and supplements them with details of corresponding statistical tests, providing a streamlined way to test data and visualize the results. 
+
+The example below is generated from the simulated dataset used earlier for the notched boxplots, showing the results of a robust (Yuen) between-group _t_-test with explanatory measure of effect size ξˆ, and means and outliers annotated on the graph. Note that the CIs listed here are different to those in the paper. The CIs reported here are for the effect size in the graph, while those in the paper are the CIs of the difference in means. Other options for the type of _t_-test used are possible.
+
+```{r}
+set.seed(1234)
+ggstatsplot::ggbetweenstats(
+  data = sim4,
+  x = "group",
+  y = "response",
+  outlier.tagging = TRUE,
+  type = "robust"
+  )
+```
+
+Here is another example, a variation of the scatterplot made using the sim5 dataset:
+
+```{r}
+ggstatsplot::ggscatterstats(
+  data = sim5,
+  x = x,
+  y = y,
+  xlab = "X Variable",
+  ylab = "Y Variable",
+  title = "An example scatterplot with ggstatsplot",
+  type = "nonparametric"
+)
+```
+
+This produces the scatterplot with additional _marginal plots_ showing the distribution of the X & Y variables. The results of a _t_-test, and a non-parametric correlation coefficient are included. 
+
+The `ggstatsplot` package offers a lot of options. By incorporating functions from numerous other packages, it makes generating and displaying results somewhat easier than if using each package separately. This is something that should be helpful for understanding your results when carrying out an analysis.
+
+## Other options
+
+* The data we will work with here is available on my GitHub repository https://github.com/pcjapan/graphical-data-analysis. The first data set is called [_comprehension-data.txt_](https://raw.githubusercontent.com/pcjapan/graphical-data-analysis/2c7d658e59f78610d2cc857b62eb79c3f4461b2f/comprehension-data.txt). Either load the data directly from GitHub or save a copy of the data in your working directory, and then read into R: 
+
+```{r}
+working <- read.delim("https://raw.githubusercontent.com/pcjapan/graphical-data-analysis/2c7d658e59f78610d2cc857b62eb79c3f4461b2f/comprehension-data.txt", header = TRUE, sep = "\t")
 ```
 
 * To work with the `ggplot2` library, and many other functions in R, your data has to be in `long` format, as opposed to `wide`
@@ -465,7 +521,7 @@ working <- read.delim("path_to_file/comprehension-data.txt", header = TRUE, sep 
 require(reshape2)
 ```
 
-* then run the necessary code. Remember, we're working with data that has been loaded into the "working" dataframe, and we will save the transformed data into a new dataframe named "longComp".
+then run the necessary code. Remember, we're working with data that has been loaded into the "working" dataframe, and we will save the transformed data into a new dataframe named "longComp".
 
 
 ```{r}
@@ -579,3 +635,70 @@ violinplot <- boxplot +
 
 violinplot
 ```
+
+## Visualising Correlations
+
+R has strong graphic support for visualising correlations. Let's look at this with a new set of data, corr_Dat. This data was from a study into developing a scale to measure certain attitudes of learners towards factors that influenced approach to language study. The file is once again available in GitHub: [_correlation.txt_](https://github.com/pcjapan/graphical-data-analysis/blob/da29f849d1bc8891e4c1e9413a23d1777e9a6196/correlation.txt)    
+
+* Base R
+
+While this doesn't show you the exact correlations, it provides a scatterplot that shows how each variable is related
+
+```{r}
+corr_Dat <- read.csv("https://raw.githubusercontent.com/pcjapan/graphical-data-analysis/da29f849d1bc8891e4c1e9413a23d1777e9a6196/correlation.txt", head = TRUE)
+pairs(corr_Dat)
+```
+* Using the `psych` library
+
+Using the `psych` library `pairs.panels` function is more informative:
+
+```{r}
+psych::pairs.panels(corr_Dat, main="Pretest - Class C", method = "spearman")
+```
+* Or use the `corrplot` library to visualise correlation matrices, as in the following example.
+
+```{r}
+cPre <- cor(corr_Dat, method = "spearman") # create correlation matrix
+corrplot::corrplot.mixed(cPre)
+```
+
+## Ridgeline Plots
+
+A **ridgeline** plot shows the distribution of a numeric variable for a number of groups. Helpful for likert scale results, for example. Use the `ggridges` library along with `ggplot` to create this particular kind of graph.
+
+In this example, we will use one more dataset, which contains the mean scores for subscale respones from the same scale used for the correlation example above. Again, get it from GitHub: the file is [_scale_means.txt_](https://github.com/pcjapan/graphical-data-analysis/blob/b2cd63b9eea32af2d5e3a26c0fd25feacb5011fa/scale-means.txt)
+
+```{r}
+library(ggridges) # Remember to load ggplot2 if you haven't already, too
+scaleMeans <- read.delim("https://raw.githubusercontent.com/pcjapan/graphical-data-analysis/JALT2020/scale-means.txt", header = TRUE, sep = "\t")
+```
+
+R cannot tell which order to treat factors, so puts them into alphabetical order when it runs commands. This means that graphs, etc, may display things in a different order to which you want. In this case, the factor _Test_ has two levels, _Pre_ and _Post_. If we create the graph as is, the _Post_ test results will be displayed before the _Pre_ results, which could be confusing. To fix this, you can easily relevel factors to put them into the correct order for the analysis:
+
+```{r}
+scaleMeans$Test <- factor(scaleMeans$Test, levels = c("Pre", "Post")) 
+```
+
+Then we can run the code to output the graph:
+
+```{r}
+ridgeG <- ggplot(scaleMeans, 
+                 aes(x = MResponse, y = Scale, fill = Scale)) # This generates the basic graph
+
+ridgeG + 
+  geom_density_ridges2(alpha = 0.8) + 
+  facet_wrap(~Class + Test, ncol = 2) + 
+  theme_ridges() + 
+  scale_x_continuous(expand = c(0.01, 0)) + 
+  scale_y_discrete(expand = c(0.01, 0)) + 
+  viridis::scale_fill_viridis(discrete = TRUE, alpha=0.6) + 
+  theme(legend.position = "none") +
+  xlab("Mean Response") # Theming, adding some colour, and separating the graphs onto individual panels
+```
+
+# End
+
+That covers everything for now. Thank you for your interest.
+
+
+
