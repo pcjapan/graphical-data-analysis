@@ -477,7 +477,6 @@ This [package](https://indrajeetpatil.github.io/ggstatsplot/index.html) plots gr
 The example below is generated from the simulated dataset used earlier for the notched boxplots, showing the results of a robust (Yuen) between-group _t_-test with explanatory measure of effect size ξˆ, and means and outliers annotated on the graph. Note that the CIs listed here are different to those in the paper. The CIs reported here are for the effect size in the graph, while those in the paper are the CIs of the difference in means. Other options for the type of _t_-test used are possible.
 
 ```{r}
-set.seed(1234)
 ggstatsplot::ggbetweenstats(
   data = sim4,
   x = "group",
