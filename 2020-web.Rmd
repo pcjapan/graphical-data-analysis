@@ -75,6 +75,26 @@ library(cowplot)
 library(ggstatsplot)
 library(viridisLite)
 library(rmdformats)
+<<<<<<< HEAD
+=======
+
+working <- read.delim("comprehension-data.txt", header = TRUE, sep = "\t")
+pre <- read.delim("pretest.txt", header = TRUE, sep = "\t")
+c_Pre <- subset(pre, Class=="C")
+memory <- c_Pre[c(4:12)]
+cognitive <- c_Pre[c(13:26)]
+compensation <- c_Pre[c(27:32)]
+metacog <- c_Pre[c(33:41)]
+affective <- c_Pre[c(42:47)]
+social <- c_Pre[c(48:53)]
+memoryTotal <- rowSums(memory[,c(1:9)])
+cognitiveTotal <- rowSums(cognitive[,c(1:14)])
+compTotal <- rowSums(compensation[,c(1:6)])
+metacogTotal <- rowSums(metacog[,c(1:9)])
+affectTotal <- rowSums(affective[,c(1:6)])
+socialTotal <- rowSums(social[,c(1:6)])
+corr_Dat <- read.delim("correlation.txt", header = TRUE, sep = ",")
+>>>>>>> 44d11e9491b3013d93274388267885992afc6576
 ```
 # Preparing your data
 
@@ -430,8 +450,11 @@ ggplot(sim5) +
   scale_linetype_discrete(guide = FALSE) 
 ```
 
+<<<<<<< HEAD
 # Estimation Plots
 
+=======
+>>>>>>> 44d11e9491b3013d93274388267885992afc6576
 ## Unpaired estimation plot (2 sample)
 
 An alternative to carrying out statistical significance tests. 
@@ -472,6 +495,7 @@ The following was not included in the original paper due to word count limitatio
 
 ## ggstatsplot
 
+<<<<<<< HEAD
 This [package](https://indrajeetpatil.github.io/ggstatsplot/index.html) plots graphs and supplements them with details of corresponding statistical tests, providing a streamlined way to test data and visualize the results. 
 
 The example below is generated from the simulated dataset used earlier for the notched boxplots, showing the results of a robust (Yuen) between-group _t_-test with explanatory measure of effect size ξˆ, and means and outliers annotated on the graph. Note that the CIs listed here are different to those in the paper. The CIs reported here are for the effect size in the graph, while those in the paper are the CIs of the difference in means. Other options for the type of _t_-test used are possible.
@@ -510,6 +534,28 @@ The `ggstatsplot` package offers a lot of options. By incorporating functions fr
 * The data we will work with here is available on my GitHub repository https://github.com/pcjapan/graphical-data-analysis. The first data set is called [_comprehension-data.txt_](https://raw.githubusercontent.com/pcjapan/graphical-data-analysis/2c7d658e59f78610d2cc857b62eb79c3f4461b2f/comprehension-data.txt). Either load the data directly from GitHub or save a copy of the data in your working directory, and then read into R: 
 
 ```{r}
+=======
+This package plots graphs and supplements them with details of corresponding statistical tests, providing a streamlined way to test data and visualize the results. 
+
+The example below is generated from the simulated dataset used earlier for the notched boxplots, showing the results of a robust (Yuen) _t_-test with effect size ξˆ, and means and outliers annotated on the graph. 
+
+```{r}
+ggstatsplot::ggbetweenstats(sim4, 
+                            x = "group", 
+                            y = "response", 
+                            outlier.tagging = TRUE, 
+                            type = "robust"
+                            )
+```
+
+The `ggstatsplot` package offers a lot of options. By incorporating functions from numerous other packages, it makes generating and displaying results somewhat easier than if using each package separately. This is something that should be helpful for understanding your results when carrying out an analysis.
+
+## Other options
+
+* The data we will work with here is available on my GitHub repository https://github.com/pcjapan/graphical-data-analysis. The first data set is called [_comprehension-data.txt_](https://raw.githubusercontent.com/pcjapan/graphical-data-analysis/2c7d658e59f78610d2cc857b62eb79c3f4461b2f/comprehension-data.txt). Either load the data directly from GitHub or save a copy of the data in your working directory, and then read into R: 
+
+```{r eval = FALSE}
+>>>>>>> 44d11e9491b3013d93274388267885992afc6576
 working <- read.delim("https://raw.githubusercontent.com/pcjapan/graphical-data-analysis/2c7d658e59f78610d2cc857b62eb79c3f4461b2f/comprehension-data.txt", header = TRUE, sep = "\t")
 ```
 
