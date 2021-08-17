@@ -15,9 +15,6 @@ output:
     toc: true
     toc_float: true
     number_sections: true
-  word_document:
-    toc: true
-  bibliography: bibliography.bib
 ---
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE, class.source = "bg-success", fig.height=10, fig.width=10)
@@ -59,17 +56,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ```{r include = FALSE}
-library(tidytext)
-library(tidyr)
-library(dplyr)
 library(ggplot2)
-library(hrbrthemes)
 library(ggExtra)
 library(reshape2)
 library(ggridges)
 library(dabestr)
-library(readtext)
-library(quanteda)
 library(truncnorm)
 library(cowplot)
 library(ggstatsplot)
@@ -121,10 +112,10 @@ head(x3); tail(x3)
 Using the `hist` command which is part of the base installation of R. Work with the `sim1` & `sim2` samples from above. 
 
 ```{r fig.height=5, fig.width=8}
-hist(sim1, prob=F, main = "", xlab = "Group 1", xlim = c(0,10), ylim = c(0,20), breaks=15, cex.main=1.5, cex.lab=1.5, cex.axis=1.5)
+hist(sim1, prob=F, main = "Group 1 Distribution", xlab = "Group 1", xlim = c(0,10), ylim = c(0,20), breaks=15, cex.main=1.5, cex.lab=1.5, cex.axis=1.5)
 abline(v=mean(sim1),col="blue", lty = 2)
 
-hist(sim2, prob=F, main = "", xlab = "Group 2", xlim = c(0,10), breaks=15, cex.main=1.5, cex.lab=1.5, cex.axis=1.5)
+hist(sim2, prob=F, main = "Group 2 Distribution", xlab = "Group 2", xlim = c(0,10), breaks=15, cex.main=1.5, cex.lab=1.5, cex.axis=1.5)
 abline(v=mean(sim1),col="blue", lty = 2)
 ```
 
@@ -173,7 +164,6 @@ fig5a <- ggplot(x1) +
   theme(axis.text.x = element_text(size=14), 
         axis.text.y = element_text(size = 14),
         axis.title = element_text(size = 16, lineheight = 2),
-        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
         strip.text.x = element_text(size = 14)) +
   ylim(0, 10) +
   labs(x = "Group 1", y = "Comprehension Score")
@@ -185,7 +175,6 @@ fig5b <- ggplot(x2) +
   theme(axis.text.x = element_text(size=14),
         axis.text.y = element_blank(),
         axis.title = element_text(size = 16, lineheight = 2),
-        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
         strip.text.x = element_text(size = 14)) +
   ylim(0, 10) +
   labs(x = "Group 2", y = "")
@@ -201,9 +190,8 @@ library(cowplot)
 ...using the `plot_grid` command from `cowplot`
 
 ```{r}
-plot_grid(fig5a, fig5b)
+plot_grid(fig5a, fig5b, labels = c("Boxplot example", ""))
 ```
-
 
 
 ## Boxplots for simulated data set 1 augmented with jittered data
@@ -211,7 +199,7 @@ plot_grid(fig5a, fig5b)
 Here we add the data points to the boxplot. This involves just one extra line of code:
 
 
-```{r fig.cap = "Figure 6"}
+```{r}
 fig6a <- ggplot(x1) +
   aes(x = "", y = sim1) +
   geom_boxplot() +
@@ -221,7 +209,6 @@ fig6a <- ggplot(x1) +
   theme(axis.text.x = element_text(size=14),
         axis.text.y = element_text(size = 14),
         axis.title = element_text(size = 16, lineheight = 2),
-        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
         strip.text.x = element_text(size = 14)) +
   ylim(0, 10) +
   labs(x = "Group 1", y = "Comprehension Score")
@@ -234,11 +221,13 @@ fig6b <- ggplot(x2) +
   theme(axis.text.x = element_text(size=14), 
         axis.text.y = element_blank(),
         axis.title = element_text(size = 16, lineheight = 2),
-        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
         strip.text.x = element_text(size = 14,)) +
   ylim(0, 10) +
   labs(x = "Group 2", y = "")
-plot_grid(fig6a, fig6b)
+
+# plot the two graphs on the same grid
+
+plot_grid(fig6a, fig6b, labels = c("Boxplots with data points", ""))
 ```
 
 ## Dotplot for simulated data set 1
@@ -256,7 +245,6 @@ fig7a <- ggplot(x1) +
         axis.text.x = element_text(size=14),
         axis.text.y = element_text(size = 14),
         axis.title = element_text(size = 16, lineheight = 2),
-        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
         strip.text.x = element_text(size = 14)) +
   ylim(0, 10) +
   labs(x = "Group 1", y = "Comprehension Score")
@@ -270,12 +258,13 @@ fig7b <- ggplot(x2) +
         axis.text.x = element_text(size=14), 
         axis.text.y = element_blank(), 
         axis.title = element_text(size = 16, lineheight = 2),
-        plot.title = element_text(size = 14, lineheight = 2, face="bold"),
         strip.text.x = element_text(size = 14)) +
   ylim(0, 10) +
   labs(x = "Group 2", y = "")
 
-plot_grid(fig7a, fig7b)
+# plot the two graphs on the same grid
+
+plot_grid(fig7a, fig7b,labels = c("Dotplot example", ""))
 ```
 
 ## Violin plots for simulated data set 1
@@ -292,7 +281,6 @@ fig8a <- ggplot(x1) +
   theme(axis.text.x = element_text(size=14),
         axis.text.y = element_text(size = 14),
         axis.title = element_text(size = 16, lineheight = 2),
-        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
         strip.text.x = element_text(size = 14)) +
   ylim(0, 10) +
   labs(x = "Group 1", y = "Comprehension Score")
@@ -304,12 +292,13 @@ fig8b <- ggplot(x2) +
   theme(axis.text.x = element_text(size=14),
         axis.text.y = element_blank(),
         axis.title = element_text(size = 16, lineheight = 2),
-        plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
         strip.text.x = element_text(size = 14)) +
   ylim(0, 10) +
   labs(x = "Group 2", y = "")
 
-plot_grid(fig8a, fig8b)
+# plot the two graphs on the same grid
+
+plot_grid(fig8a, fig8b,labels = c("Violin plot example", ""))
 ```
 
 ## Notched boxplots
@@ -330,25 +319,30 @@ ggplot(sim4) +
         axis.title = element_text(size = 16, lineheight = 2),
         plot.title = element_text(size = 14, lineheight = 2, face="bold"), 
         strip.text.x = element_text(size = 14)) +
+  ggtitle("Notched boxplot example") +
   ylim(55, 85) +
   labs(x = "Groups", y = "")
 ```
 
 # Scatterplots - Looking at Relationships
 
-## Anscombe’s scatterplots.
-(Code taken from the _dataset_ package - see https://rdrr.io/r/datasets/anscombe.html)
+*Scatterplots* are used to show how data is correlated.
 
-Visualising the dataset doesn't give a lot of information
+## Anscombe’s scatterplots.
+(Code taken from the [_dataset_ package](https://rdrr.io/r/datasets/anscombe.html))
+
+A demonstration of how statistics alone can be deceiving.
+
+Looking at the dataset doesn't give a lot of information:
 
 ```{r}
 anscombe
 ```
 
-Printing a summary of the data suggests each dataset is very similar:
+Looking at the descriptive statistics of the data suggests each dataset is very similar:
 
 ```{r}
-summary(anscombe)
+summary(anscombe) 
 ```
 
 ```{r include = FALSE}
@@ -366,12 +360,13 @@ sapply(mods, coef)
 lapply(mods, function(fm) coef(summary(fm)))
 ```
 
-As do the results of a regression analysis comparing the datasets:
+As do the results of a regression analysis comparing the datasets. As can be seen, the results of each regression below are almost identical:
 
 ```{r}
 summary(lm(y1 ~ x1, dat = anscombe))
 summary(lm(y2 ~ x2, dat = anscombe))
 summary(lm(y3 ~ x3, dat = anscombe))
+summary(lm(y4 ~ x4, dat = anscombe))
 ```
 
 
@@ -383,20 +378,19 @@ op <- par(mfrow = c(2, 2), mar = 0.1+c(4,4,1,1), oma =  c(0, 0, 2, 0))
 However, graphing the data shows how the statistics can be misleading:
 
 ```{r}
-
 for(i in 1:4) {
   ff[2:3] <- lapply(paste0(c("y","x"), i), as.name)
   plot(ff, data = anscombe, col = "red", pch = 21, bg = "orange", cex = 1.2,
-       xlim = c(3, 19), ylim = c(3, 13))
+       xlim = c(3, 19), ylim = c(3, 13), main = paste("Anscombe's scatterplot", i))
   abline(mods[[i]], col = "blue")
 }
 ```
 
 
+The point being, always examine your data graphically to understand what it tells you. 
 
 
-
-## Scatterplot with loess and regression lines for simulated dataset 3
+## Scatterplot with loess and regression lines for simulated dataset
 
 First, generate the dataset to use
 
@@ -411,7 +405,27 @@ group_names <- c(
   B = "Group B"
 )
 ```
-Next, generate the plot. This includes a regression line (dotted blue line) with confidence interval band, and a loess line (the curved line). 
+
+Next, generate the plot. 
+
+This can be done fairly simply in base R with the `plot` function:
+
+```{r}
+plot(sim5$x, sim5$y,
+     main = "Basic scatterplot")
+```
+Add a regression line (blue) and loess line (red):
+
+```{r}
+plot(sim5$x, sim5$y,
+     main = "Basic scatterplot")
+abline(lm(y ~ x, data = sim5), col = "blue")
+lines(lowess(sim5$x, sim5$y), col = "red")
+```
+
+
+`ggplot` gives more control. Let's separate the data into groups and  plot showing the regression line (dotted blue line) with confidence interval band, and a loess line (the curved line):
+
 
 ```{r}
 ggplot(sim5) +
@@ -425,42 +439,44 @@ ggplot(sim5) +
   theme(axis.text.x = element_text(size=14),
         axis.text.y = element_text(size = 14),
         axis.title = element_text(size = 16, lineheight = 2),
-        plot.title = element_text(size = 14, lineheight = 2, face="bold"),
         strip.text.x = element_text(size = 14)) + 
-  scale_linetype_discrete(guide = FALSE) 
+  scale_linetype_discrete(guide = FALSE) +
+  ggtitle("Scatterplot with grouped data")
 ```
 
-<<<<<<< HEAD
+
 # Estimation Plots
 
-=======
-<<<<<<< HEAD
-# Estimation Plots
-
-=======
->>>>>>> 44d11e9491b3013d93274388267885992afc6576
->>>>>>> 56d3c09d8caa9731eaeb42dcaa32b5407f28fbb9
 ## Unpaired estimation plot (2 sample)
 
 An alternative to carrying out statistical significance tests. 
-First, transfer the data set to the correct format
+First, transfer the data set to the correct format:
 
 ```{r}
 sim5.long <- reshape2::melt(sim5, id = c("Subject", "Group"), measured = c("x", "y"))
 ```
 
+Then process the data and show a summary:
+
 ```{r}
 fig12 <- dabest(sim5.long, variable, value,
-                             idx = c("x", "y"),
-                             paired = FALSE) %>% 
+                idx = c("x", "y"),
+                paired = FALSE) %>% 
   cohens_d()
 
 fig12
 
+```
+
+Finally, generate the plot:
+
+```{r}
 plot(fig12, color.column = Group, rawplot.ylabel = "Group Scores", effsize.ylabel = "Effect Size (Cohens d) and 95% CI (5,000 bootstrap resamples)")
 ```
 
 ## Paired estimation plot (2 sample)
+
+Apply the analysis and show the output:
 
 ```{r}
 fig13 <- dabest(sim5.long, variable, value,
@@ -468,11 +484,14 @@ fig13 <- dabest(sim5.long, variable, value,
                            paired = TRUE, id.col = Subject)
 fig13.effect <- cohens_d(fig13)  
 
-
-plot(fig13.effect, color.column = Group, rawplot.ylabel = "Group Scores", effsize.ylabel = "Effect Size (Cohens d) and 95% CI (5,000 bootstrap resamples)")
-
+fig13.effect
 ```
 
+Generate the graph:
+
+```{r}
+plot(fig13.effect, color.column = Group, rawplot.ylabel = "Group Scores", effsize.ylabel = "Effect Size (Cohens d) and 95% CI (5,000 bootstrap resamples)")
+```
 
 # Extras
 
@@ -489,6 +508,7 @@ ggstatsplot::ggbetweenstats(
   data = sim4,
   x = "group",
   y = "response",
+  title = "Between-subjects analysis with ggstatsplot",
   outlier.tagging = TRUE,
   type = "robust"
   )
@@ -569,7 +589,8 @@ Here, think about what you are expecting to see in the data. A skewed distributi
 ```{r}
 ggplot(working, aes(x=Pretest)) + 
   geom_histogram(aes(y=..density..), colour="gray", fill="white", binwidth = .3)+
-  geom_density(color = "red", alpha=.2, fill="#FF6666") 
+  geom_density(color = "red", alpha=.2, fill="#FF6666") +
+  ggtitle("Pretest data distribution")
 ```
 
 
@@ -580,7 +601,8 @@ line <- ggplot(longComp, aes(Test, Comprehension, color = Class))
 line + stat_summary(fun = mean, geom = "point") + 
   stat_summary(fun = mean, geom = "line", aes(group = Class)) +
   theme_minimal() + 
-  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + ## Add confidence interval (CI) error bars
+  stat_summary(fun.data = mean_cl_boot, geom = "errorbar", width = 0.2) + ## Add confidence interval (CI) error bars 
+  ggtitle("Example line graph") +
   facet_grid(.~Class)
 ```
 
@@ -615,7 +637,7 @@ CompBox <- boxplot +
         strip.text.x = element_text(size = 14), 
         panel.background = element_rect(fill = "snow1")) + 
   viridis::scale_fill_viridis(discrete = TRUE, alpha=0.6) + # Use the viridis colour palettes for colour choices - improves readability
-  ggtitle("Changes in Comprehension Scores") + # add a title
+  ggtitle("Changes in comprehension scores") + # add a title
   scale_y_continuous(breaks=seq(0,10,1)) + # set the y-axis scale
   facet_wrap(~Test) # this creates a panelled view where the graphs are displayed in separate panels based on the "Test" condition
 
@@ -637,7 +659,7 @@ violinplot <- boxplot +
         strip.text.x = element_text(size = 14), 
         panel.background = element_rect(fill = "snow1")) + 
   viridis::scale_fill_viridis(discrete = TRUE, alpha=0.6) +
-  ggtitle("Changes in Comprehension Scores") + 
+  ggtitle("Changes in comprehension scores") + 
   scale_y_continuous(breaks=seq(0,10,1)) + 
   facet_wrap(~Test) 
 
@@ -700,6 +722,7 @@ ridgeG +
   scale_x_continuous(expand = c(0.01, 0)) + 
   scale_y_discrete(expand = c(0.01, 0)) + 
   viridis::scale_fill_viridis(discrete = TRUE, alpha=0.6) + 
+  ggtitle("Ridgeline plot example") +
   theme(legend.position = "none") +
   xlab("Mean Response") # Theming, adding some colour, and separating the graphs onto individual panels
 ```
